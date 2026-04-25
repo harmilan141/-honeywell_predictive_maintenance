@@ -18,6 +18,26 @@ def load_data(path):
     df.columns = columns
     return df
 
+
+# 2. 🔥 ADD THIS PART HERE (VERY IMPORTANT)
+
+# Create missing sensors
+for i in range(18, 22):
+    df[f"sensor_{i}"] = df[f"sensor_{i-1}"] * 1.05
+
+# Create rolling features
+window = 3
+for i in range(1, 9):
+    df[f"sensor_{i}_rolling_mean"] = df[f"sensor_{i}"].rolling(window, min_periods=1).mean()
+    df[f"sensor_{i}_rolling_std"] = df[f"sensor_{i}"].rolling(window, min_periods=1).std().fillna(0)
+
+# 3. (Optional) Handle any missing columns
+df.fillna(0, inplace=True)
+
+# 4. Now predict ✅
+prediction = model.predict(df)
+
+
 # Load datasets
 train_df = load_data(TRAIN_PATH)
 test_df = load_data(TEST_PATH)
