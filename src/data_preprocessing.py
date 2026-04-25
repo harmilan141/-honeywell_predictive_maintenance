@@ -1,13 +1,10 @@
 import pandas as pd
-import numpy as np
 import os
 
-# File paths
 TRAIN_PATH = "data/raw/train_FD001.txt"
 TEST_PATH = "data/raw/test_FD001.txt"
 RUL_PATH = "data/raw/RUL_FD001.txt"
 
-# Column names
 columns = ['unit', 'cycle'] + \
           [f'op_setting_{i}' for i in range(1, 4)] + \
           [f'sensor_{i}' for i in range(1, 22)]
@@ -18,31 +15,37 @@ def load_data(path):
     df.columns = columns
     return df
 
+def add_rolling_features(df):
+    window = 3
 
-# 2. 🔥 ADD THIS PART HERE (VERY IMPORTANT)
+    for i in range(1, 9):
+        df[f"sensor_{i}_rolling_mean"] = (
+            df.groupby("unit")[f"sensor_{i}"]
+            .rolling(window, min_periods=1)
+            .mean()
+            .reset_index(level=0, drop=True)
+        )
 
-# Create missing sensors
-for i in range(18, 22):
-    df[f"sensor_{i}"] = df[f"sensor_{i-1}"] * 1.05
+        df[f"sensor_{i}_rolling_std"] = (
+            df.groupby("unit")[f"sensor_{i}"]
+            .rolling(window, min_periods=1)
+            .std()
+            .reset_index(level=0, drop=True)
+            .fillna(0)
+        )
 
-# Create rolling features
-window = 3
-for i in range(1, 9):
-    df[f"sensor_{i}_rolling_mean"] = df[f"sensor_{i}"].rolling(window, min_periods=1).mean()
-    df[f"sensor_{i}_rolling_std"] = df[f"sensor_{i}"].rolling(window, min_periods=1).std().fillna(0)
-
-# 3. (Optional) Handle any missing columns
-df.fillna(0, inplace=True)
-
-# 4. Now predict ✅
-prediction = model.predict(df)
-
+    df.fillna(0, inplace=True)
+    return df
 
 # Load datasets
 train_df = load_data(TRAIN_PATH)
 test_df = load_data(TEST_PATH)
 rul_df = pd.read_csv(RUL_PATH, header=None)
 rul_df.columns = ['RUL']
+
+# Create rolling features
+train_df = add_rolling_features(train_df)
+test_df = add_rolling_features(test_df)
 
 # Create RUL for training data
 max_cycle = train_df.groupby('unit')['cycle'].max().reset_index()
