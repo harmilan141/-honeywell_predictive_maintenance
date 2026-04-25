@@ -12,21 +12,21 @@ st.set_page_config(
 MODEL_PATH = "models/predictive_maintenance_model.h5"
 SCALER_PATH = "models/scaler.pkl"
 DATA_PATH = "data/processed/train_features.csv"
+METRICS_PATH = "models/metrics.pkl"
 
 model = load_model(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
+metrics = joblib.load(METRICS_PATH)
 
 st.title("⚙️ SmartPredict: Predictive Maintenance System")
 
 
 st.subheader("Model Performance")
 
-y_pred = model.predict(X_test)
-
-from sklearn.metrics import accuracy_score
-accuracy = accuracy_score(y_test, y_pred)
-
-st.metric("Accuracy", f"{accuracy:.2%}")
+st.metric("Accuracy", f"{metrics['accuracy']:.2%}")
+st.metric("Precision", f"{metrics['precision']:.2%}")
+st.metric("Recall", f"{metrics['recall']:.2%}")
+st.metric("F1 Score", f"{metrics['f1']:.2%}")
 
 
 st.write("Neural Network-based failure prediction for smart factory equipment.")

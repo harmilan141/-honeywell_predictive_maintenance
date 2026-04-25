@@ -4,7 +4,7 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
@@ -61,25 +61,33 @@ model.fit(
     verbose=1
 )
 
-# Predictions
-y_pred = model.predict(X_test)
-
-# Accuracy
-from sklearn.metrics import accuracy_score
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Model Accuracy: {accuracy:.2%}")
-
-y_pred_prob = model.predict(X_test_scaled)
-y_pred = (y_pred_prob > 0.5).astype(int)
-
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print(classification_report(y_test, y_pred))
-
 os.makedirs("models", exist_ok=True)
+
+y_prob = model.predict(X_test_scaled)
+y_pred = (y_prob > 0.5).astype(int).ravel()
+
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Precision:", precision)
+print("Recall:", recall)
+print("F1 Score:", f1)
+
+metrics = {
+    "accuracy": accuracy,
+    "precision": precision,
+    "recall": recall,
+    "f1": f1
+}
+
+joblib.dump(metrics, "models/metrics.pkl")
 
 model.save(MODEL_PATH)
 joblib.dump(scaler, SCALER_PATH)
 
-print("✅ Model training completed!")
-print("✅ Model saved at:", MODEL_PATH)
-print("✅ Scaler saved at:", SCALER_PATH)
+print("Model training completed!")
+print("Model saved at:", MODEL_PATH)
+print("Scaler saved at:", SCALER_PATH)
