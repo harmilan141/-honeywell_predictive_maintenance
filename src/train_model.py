@@ -61,6 +61,14 @@ model.fit(
     verbose=1
 )
 
+# Predictions
+y_pred = model.predict(X_test)
+
+# Accuracy
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy:.2%}")
+
 y_pred_prob = model.predict(X_test_scaled)
 y_pred = (y_pred_prob > 0.5).astype(int)
 

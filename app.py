@@ -17,6 +17,18 @@ model = load_model(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
 
 st.title("⚙️ SmartPredict: Predictive Maintenance System")
+
+
+st.subheader("Model Performance")
+
+y_pred = model.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(y_test, y_pred)
+
+st.metric("Accuracy", f"{accuracy:.2%}")
+
+
 st.write("Neural Network-based failure prediction for smart factory equipment.")
 
 df = pd.read_csv(DATA_PATH)
